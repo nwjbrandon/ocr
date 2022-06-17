@@ -53,8 +53,8 @@ def main():
     )
 
     # Create dataset
-    train_dataset = MinstDataset(cfg)
-    val_dataset = MinstDataset(cfg)
+    train_dataset = MinstDataset(cfg, is_train=True)
+    val_dataset = MinstDataset(cfg, is_train=False)
     train_dataloader = DataLoader(
         train_dataset,
         cfg["train"]["batch_size"],

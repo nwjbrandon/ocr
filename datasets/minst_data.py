@@ -25,7 +25,7 @@ def concat_image_horizontally(im1, im2, offset, threshold):
 
 
 def generate_data_of_n_characters(dataset, n_char=3, threshold=100):
-    n1 = random.randint(0, len(dataset))
+    n1 = random.randint(0, len(dataset) - 1)
     img1 = np.asarray(dataset[n1][0]).copy()
     text = str(dataset[n1][1])
     positions = [
