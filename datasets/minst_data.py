@@ -35,7 +35,7 @@ def generate_data_of_n_characters(dataset, n_char=3, threshold=100):
     # Combine images of characters
     for _ in range(n_char):
         offset = random.randint(0, 6)
-        n2 = random.randint(0, len(dataset))
+        n2 = random.randint(0, len(dataset) - 1)
         img2 = np.asarray(dataset[n2][0]).copy()
         text += str(dataset[n2][1])
         prev_h, prev_w = positions[-1]

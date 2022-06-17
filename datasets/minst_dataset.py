@@ -14,22 +14,30 @@ from datasets.minst_data import (
 
 class MinstDataset(Dataset):
     def __init__(self, cfg, is_train):
-        self.n_data = cfg["dataset"]["n_data"]
         self.is_visualise = cfg["dataset"]["is_visualise"]
         self.img_training_size = cfg["dataset"]["img_training_size"]
         self.is_train = is_train
 
         if self.is_train:
             self.mnist_trainset = datasets.MNIST(
-                root="./data", train=True, download=True, transform=None
+                root="./data",
+                train=self.is_train,
+                download=True,
+                transform=None,
             )
-            print("Size of val set", len(self.mnist_trainset))
+            print("Size of train set", len(self.mnist_trainset))
+            self.n_data = cfg["dataset"]["n_data"]
+
         else:
             self.mnist_trainset = datasets.MNIST(
-                root="./data", train=False, download=True, transform=None
+                root="./data",
+                train=self.is_train,
+                download=True,
+                transform=None,
             )
             print("Size of val set", len(self.mnist_trainset))
 
+        self.n_data = len(self.mnist_trainset)
         self.image_transform = transforms.Compose(
             [transforms.Resize(self.img_training_size), transforms.ToTensor(),]
         )
