@@ -1,0 +1,25 @@
+dataset:
+  is_visualise: False
+  n_data: 60000
+  img_training_size: 500
+train:
+  batch_size: 32
+  ckpt_freq: 1
+  device: cpu
+  epochs: 30
+  loss_file: loss.txt
+  lr: 0.001
+  model_file: pytorch_model
+  num_workers: 8
+  optimizer: torch.optim.AdamW
+  scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
+  scheduler_factor: 0.5
+  scheduler_patience: 5
+  scheduler_threshold: 0.0001
+  scheduler_verbose: True
+  shuffle: True
+model:
+  model: models.unet.UNet
+  in_channels: 1
+  out_channels: 2
+  ckpt: null
