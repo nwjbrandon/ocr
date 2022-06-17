@@ -3,8 +3,7 @@ import argparse
 import torch
 from torch.utils.data import DataLoader
 
-from datasets.minst_dataset import MinstDataset
-from trainers.trainer import Trainer
+from utils.data import collate_fn
 from utils.io import import_module, load_config
 
 
@@ -42,7 +41,8 @@ def main():
 
     # Create optimizer and schedular
     Optimizer = import_module(cfg["train"]["optimizer"])
-    optimizer = Optimizer(model.parameters(), lr=cfg["train"]["lr"])
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = Optimizer(params, lr=cfg["train"]["lr"])
     Scheuler = import_module(cfg["train"]["scheduler"])
     scheduler = Scheuler(
         optimizer=optimizer,
@@ -53,22 +53,26 @@ def main():
     )
 
     # Create dataset
-    train_dataset = MinstDataset(cfg, is_train=True)
-    val_dataset = MinstDataset(cfg, is_train=False)
+    Dataset = import_module(cfg["dataset"]["dataset"])
+    train_dataset = Dataset(cfg, is_train=True)
+    val_dataset = Dataset(cfg, is_train=False)
     train_dataloader = DataLoader(
         train_dataset,
         cfg["train"]["batch_size"],
         shuffle=cfg["train"]["shuffle"],
         num_workers=cfg["train"]["num_workers"],
+        collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
     )
     val_dataloader = DataLoader(
         val_dataset,
         cfg["train"]["batch_size"],
         shuffle=cfg["train"]["shuffle"],
         num_workers=cfg["train"]["num_workers"],
+        collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
     )
 
     # Train model
+    Trainer = import_module(cfg["train"]["trainer"])
     trainer = Trainer(cfg, model, scheduler, optimizer)
     trainer.train(train_dataloader, val_dataloader)
 

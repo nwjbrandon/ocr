@@ -1,2 +1,1 @@
-
-python3 train.py --cfg cfgs/text_detection.yml
+python3 main.py --cfg cfgs/text_detection_bnb.yml

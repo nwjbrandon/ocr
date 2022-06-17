@@ -27,7 +27,6 @@ class Trainer:
     def train(self, train_dataloader, val_dataloader):
         for epoch in range(self.epochs):
             self._epoch_train(epoch, train_dataloader, val_dataloader)
-            self._epoch_eval(epoch, val_dataloader)
 
             # reducing LR if no improvement
             if self.scheduler is not None:
@@ -39,7 +38,7 @@ class Trainer:
                     self.model.state_dict(), f"{self.model_file}_{epoch+1}.pth"
                 )
 
-        torch.save(self.model.state_dict(), "model_final")
+        torch.save(self.model.state_dict(), "pytorch_model_last")
         return self.model
 
     def _epoch_train(self, epoch, train_dataloader, val_dataloader):
