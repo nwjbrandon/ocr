@@ -200,19 +200,15 @@ class MinstRecDataset(Dataset):
         return np.array(label)
 
     def __getitem__(self, idx):
-        paper = (
-            np.ones(
-                (self.img_training_size, self.img_training_size), dtype=np.uint8
-            )
-            * 255
-        )
+        paper_size = (300, 300)
+        paper = np.ones(paper_size, dtype=np.uint8) * 255
 
         n_char = random.randint(0, self.n_char - 1)
         img, text, positions = generate_data_of_n_characters(
             self.mnist_trainset, n_char=n_char
         )
         paper, positions, _, _ = render_data_on_paper(
-            img, positions, paper=paper.copy()
+            img, positions, max_scale=1.2, paper=paper.copy()
         )
 
         text_gt = self._create_label(text)

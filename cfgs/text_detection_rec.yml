@@ -10,14 +10,14 @@ train:
   trainer: trainers.rec_trainer.Trainer
   ckpt_freq: 1
   device: cuda
-  epochs: 30
+  epochs: 300
   loss_file: loss.txt
   model_file: ckpts/pytorch_model
   eval_step: 1000
   dataloader_params:
     num_workers: 4
     shuffle: True
-    batch_size: 16
+    batch_size: 64
   optimizer: torch.optim.RMSprop
   optimizer_params:
     lr: 0.00001
