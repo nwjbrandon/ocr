@@ -115,7 +115,5 @@ class UNet(nn.Module):
         x = self.up2(x, x3)
         x = self.up3(x, x2)
         x = self.up4(x, x1)
-        out = self.outc(x)
-        region = out[:, 0, :, :]
-        affinity = out[:, 1, :, :]
-        return region, affinity
+        logits = self.outc(x)
+        return logits

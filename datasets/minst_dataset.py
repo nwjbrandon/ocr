@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 import torchvision.datasets as datasets
 from PIL import Image
@@ -84,6 +85,77 @@ class MinstDensityDataset(Dataset):
             "region_gt": region_gt,
             "affinity_gt": affinity_gt,
         }
+
+
+class MinstSegDataset(Dataset):
+    def __init__(self, cfg, is_train):
+        self.is_visualise = cfg["dataset"]["is_visualise"]
+        self.img_training_size = cfg["dataset"]["img_training_size"]
+        self.is_train = is_train
+
+        if self.is_train:
+            self.mnist_trainset = datasets.MNIST(
+                root="./data",
+                train=self.is_train,
+                download=True,
+                transform=None,
+            )
+            print("Size of train set", len(self.mnist_trainset))
+            self.n_data = cfg["dataset"]["n_data"]
+
+        else:
+            self.mnist_trainset = datasets.MNIST(
+                root="./data",
+                train=self.is_train,
+                download=True,
+                transform=None,
+            )
+            print("Size of val set", len(self.mnist_trainset))
+
+        self.n_data = len(self.mnist_trainset)
+        self.image_transform = transforms.Compose(
+            [transforms.Resize(self.img_training_size), transforms.ToTensor(),]
+        )
+
+    def __len__(self):
+        return self.n_data
+
+    def _create_mask(self, image, bnb_box_list):
+        # bg = np.zeros_like(image, dtype=float)
+        # text = np.zeros_like(image, dtype=float)
+        # mask = image > 100
+        # text[mask] = 1.0
+        # bg[~mask] = 0.0
+        # return np.stack([bg, text])
+        mask = np.zeros_like(image, dtype=int)
+        mask[image < 100] = 1
+        return mask
+
+    def __getitem__(self, idx):
+
+        (
+            paper,
+            positions_list,
+            bnb_box_list,
+            text_list,
+        ) = render_multiple_data_on_paper(
+            20,
+            self.mnist_trainset,
+            paper_size=(self.img_training_size, self.img_training_size),
+        )
+        mask = self._create_mask(paper, bnb_box_list)
+        if self.is_visualise:
+            _, ax = plt.subplots(1, 2, figsize=(20, 20))
+            ax[0].imshow(paper)
+            ax[0].set_title("Image")
+            ax[1].imshow(mask)
+            ax[1].set_title("Mask")
+            plt.show()
+
+        image = Image.fromarray(paper)
+        image_inp = self.image_transform(image)
+
+        return {"image_inp": image_inp, "mask_gt": mask}
 
 
 class MinstBnBDataset(Dataset):

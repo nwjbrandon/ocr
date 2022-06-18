@@ -1,8 +1,10 @@
 import numpy as np
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from tqdm import tqdm
 
-from utils.losses import IoULoss
+from utils.losses import dice_loss
 
 
 class Trainer:
@@ -11,8 +13,9 @@ class Trainer:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
-        self.criterion1 = IoULoss()
-        self.criterion2 = IoULoss()
+        self.criterion1 = nn.CrossEntropyLoss()
+
+        self.n_classes = cfg["dataset"]["n_classes"]
 
         self.epochs = cfg["train"]["epochs"]
         self.device = cfg["train"]["device"]
@@ -57,20 +60,16 @@ class Trainer:
 
         for i, data in enumerate(tqdm(train_dataloader), 0):
             image_inp = data["image_inp"].float()
-            region_gt = data["region_gt"].float()
-            affinity_gt = data["affinity_gt"].float()
+            mask_gt = data["mask_gt"]
 
             image_inp = image_inp.to(self.device)
-            region_gt = region_gt.to(self.device)
-            affinity_gt = affinity_gt.to(self.device)
+            mask_gt = mask_gt.to(self.device)
 
             self.optimizer.zero_grad()
 
-            region_pred, affinity_pred = self.model(image_inp)
+            mask_pred = self.model(image_inp)
 
-            losses = self.criterion(
-                region_pred, region_gt, affinity_pred, affinity_gt
-            )
+            losses = self.criterion(mask_pred, mask_gt)
 
             losses.backward()
             self.optimizer.step()
@@ -86,26 +85,24 @@ class Trainer:
         with torch.no_grad():
             for i, data in enumerate(tqdm(dataloader), 0):
                 image_inp = data["image_inp"].float()
-                region_gt = data["region_gt"].float()
-                affinity_gt = data["affinity_gt"].float()
+                mask_gt = data["mask_gt"]
 
                 image_inp = image_inp.to(self.device)
-                region_gt = region_gt.to(self.device)
-                affinity_gt = affinity_gt.to(self.device)
+                mask_gt = mask_gt.to(self.device)
 
-                region_pred, affinity_pred = self.model(image_inp)
+                mask_pred = self.model(image_inp)
 
-                losses = self.criterion(
-                    region_pred, region_gt, affinity_pred, affinity_gt
-                )
+                losses = self.criterion(mask_pred, mask_gt)
 
                 running_loss.append(losses.item())
 
         epoch_loss = np.mean(running_loss)
         self.loss["val"].append(epoch_loss)
 
-    def criterion(self, region_pred, region_gt, affinity_pred, affinity_gt):
-        loss1 = self.criterion1(region_pred, region_gt)
-        loss2 = self.criterion2(affinity_pred, affinity_gt)
-        losses = loss1 + loss2
-        return losses
+    def criterion(self, mask_pred, mask_gt):
+        loss = self.criterion1(mask_pred, mask_gt) + dice_loss(
+            F.softmax(mask_pred, dim=1).float(),
+            F.one_hot(mask_gt, self.n_classes).permute(0, 3, 1, 2).float(),
+            multiclass=True,
+        )
+        return loss
