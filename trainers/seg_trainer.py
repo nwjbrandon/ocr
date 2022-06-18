@@ -1,3 +1,5 @@
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -5,6 +7,8 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from utils.losses import dice_loss
+
+matplotlib.use("TKAgg")
 
 
 class Trainer:
@@ -24,11 +28,23 @@ class Trainer:
         self.ckpt_freq = cfg["train"]["ckpt_freq"]
         self.eval_step = cfg["train"]["eval_step"]
 
+        self.ckpt_fname = cfg["model"]["ckpt"]
+
         self.step = 0
         self.loss = {"train": [], "val": []}
 
+    def _get_start_epoch(self):
+        if self.ckpt_fname is None:
+            start_epoch = 0
+        else:
+            start_epoch = int(self.ckpt_fname.split(".")[0].split("_")[-1])
+        return start_epoch
+
     def train(self, train_dataloader, val_dataloader):
-        for epoch in range(self.epochs):
+        start_epoch = self._get_start_epoch()
+        print("Start Epoch:", start_epoch)
+
+        for epoch in range(start_epoch, self.epochs):
             self._epoch_train(train_dataloader)
             self._epoch_eval(val_dataloader)
 
@@ -79,6 +95,7 @@ class Trainer:
         self.loss["train"].append(epoch_loss)
 
     def _epoch_eval(self, dataloader):
+
         self.model.eval()
         running_loss = []
 
@@ -106,3 +123,26 @@ class Trainer:
             multiclass=True,
         )
         return loss
+
+    def test(self, dataloader):
+        self.model.eval()
+
+        with torch.no_grad():
+            for i, data in enumerate(tqdm(dataloader), 0):
+                image_inp = data["image_inp"].float()
+                mask_gt = data["mask_gt"]
+
+                image_inp = image_inp.to(self.device)
+                mask_gt = mask_gt.to(self.device)
+
+                mask_pred = self.model(image_inp)
+
+                mask_gt = mask_gt.cpu().numpy()[0]
+                mask_pred = mask_pred.cpu().numpy()[0]
+
+                _, ax = plt.subplots(1, 2)
+                ax[0].imshow(mask_gt)
+                ax[0].set_title("True")
+                ax[1].imshow(mask_pred[1])
+                ax[1].set_title("Pred")
+                plt.show()

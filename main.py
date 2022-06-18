@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     print(args)
     cfg = args.cfg
-    # mode = args.mode
+    mode = args.mode
 
     cfg = load_config(cfg)
 
@@ -67,7 +67,21 @@ def main():
     # Train model
     Trainer = import_module(cfg["train"]["trainer"])
     trainer = Trainer(cfg, model, scheduler, optimizer)
-    trainer.train(train_dataloader, val_dataloader)
+    if mode == "train":
+        trainer.train(train_dataloader, val_dataloader)
+    else:
+        Dataset = import_module(cfg["dataset"]["dataset"])
+        test_dataset = Dataset(cfg, is_train=False)
+
+        cfg["train"]["dataloader_params"]["batch_size"] = 1
+        cfg["train"]["dataloader_params"]["num_workers"] = 0
+        test_dataloader = DataLoader(
+            test_dataset,
+            **cfg["train"]["dataloader_params"],
+            collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
+        )
+
+        trainer.test(test_dataloader)
 
 
 if __name__ == "__main__":

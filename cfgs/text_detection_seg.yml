@@ -31,4 +31,4 @@ model:
   model: models.unet.UNet
   in_channels: 1
   out_channels: 2
-  ckpt: null
+  ckpt: ckpts/pytorch_model_9.pth

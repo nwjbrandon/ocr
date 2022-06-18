@@ -1,3 +1,4 @@
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
@@ -12,6 +13,8 @@ from datasets.minst_data import (
     render_multiple_data_on_paper,
     visualize_multiple_centers
 )
+
+matplotlib.use("TKAgg")
 
 
 class MinstDensityDataset(Dataset):
@@ -121,12 +124,6 @@ class MinstSegDataset(Dataset):
         return self.n_data
 
     def _create_mask(self, image, bnb_box_list):
-        # bg = np.zeros_like(image, dtype=float)
-        # text = np.zeros_like(image, dtype=float)
-        # mask = image > 100
-        # text[mask] = 1.0
-        # bg[~mask] = 0.0
-        # return np.stack([bg, text])
         mask = np.zeros_like(image, dtype=int)
         mask[image < 100] = 1
         return mask
