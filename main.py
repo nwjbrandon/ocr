@@ -45,11 +45,7 @@ def main():
     optimizer = Optimizer(params, lr=cfg["train"]["lr"])
     Scheuler = import_module(cfg["train"]["scheduler"])
     scheduler = Scheuler(
-        optimizer=optimizer,
-        factor=cfg["train"]["scheduler_factor"],
-        patience=cfg["train"]["scheduler_patience"],
-        verbose=cfg["train"]["scheduler_verbose"],
-        threshold=cfg["train"]["scheduler_threshold"],
+        optimizer=optimizer, **cfg["train"]["scheduler_params"]
     )
 
     # Create dataset
