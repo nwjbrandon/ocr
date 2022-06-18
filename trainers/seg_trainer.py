@@ -78,7 +78,7 @@ class Trainer:
         epoch_loss = np.mean(running_loss)
         self.loss["train"].append(epoch_loss)
 
-    def _epoch_eval(self, epoch, dataloader):
+    def _epoch_eval(self, dataloader):
         self.model.eval()
         running_loss = []
 
