@@ -1,12 +1,13 @@
 dataset:
-  dataset: datasets.minst_dataset.MinstSegDataset
+  dataset: datasets.minst_dataset.MinstRecDataset
   is_visualise: False
   n_data: 60000
   img_training_size: 200
   use_collate: False
-  n_classes: 2
+  n_char: 4
+  n_classes: 11 # 10 digits + 1 EOF token
 train:
-  trainer: trainers.seg_trainer.Trainer
+  trainer: trainers.rec_trainer.Trainer
   ckpt_freq: 1
   device: cuda
   epochs: 30
@@ -28,7 +29,7 @@ train:
     patience: 2
     verbose: True
 model:
-  model: models.unet.UNet
+  model: models.charnet.CharNet
   in_channels: 1
   out_channels: 2
   ckpt: null
