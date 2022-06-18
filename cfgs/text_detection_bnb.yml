@@ -6,7 +6,7 @@ dataset:
   use_collate: True
 train:
   trainer: trainers.bnb_trainer.Trainer
-  batch_size: 3
+  batch_size: 64
   ckpt_freq: 1
   device: cuda
   epochs: 30

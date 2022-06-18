@@ -28,7 +28,7 @@ class Trainer:
                 train_dataloader,
                 self.device,
                 epoch,
-                print_freq=10,
+                print_freq=100,
             )
 
             train_loss = train_log.loss.value
