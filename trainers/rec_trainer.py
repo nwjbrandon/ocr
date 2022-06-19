@@ -1,5 +1,3 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -7,8 +5,6 @@ import torch.nn.functional as F
 from tqdm import tqdm
 
 from utils.losses import dice_loss
-
-matplotlib.use("TKAgg")
 
 
 class Trainer:
@@ -131,6 +127,8 @@ class Trainer:
     def test(self, dataloader):
         self.model.eval()
 
+        n_corrects = 0
+
         with torch.no_grad():
             for i, data in enumerate(tqdm(dataloader), 0):
                 image_inp = data["image_inp"].float()
@@ -144,9 +142,11 @@ class Trainer:
                 text_gt = text_gt.cpu().numpy()[0]
                 text_pred = text_pred.cpu().numpy()[0]
 
-                _, ax = plt.subplots(1, 2)
-                ax[0].imshow(text_gt)
-                ax[0].set_title("True")
-                ax[1].imshow(text_pred[1])
-                ax[1].set_title("Pred")
-                plt.show()
+                text_pred = np.argmax(text_pred, axis=0)
+
+                is_correct = np.array_equal(text_pred, text_gt)
+                if is_correct:
+                    n_corrects += 1
+                # print("text_gt:", text_gt, "text_pred:", text_pred, "correct:", is_correct)
+                # input("Enter to view next")
+        print("Accuracy:", n_corrects / len(dataloader) * 100)
