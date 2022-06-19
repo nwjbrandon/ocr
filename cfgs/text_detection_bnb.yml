@@ -6,22 +6,24 @@ dataset:
   use_collate: True
 train:
   trainer: trainers.bnb_trainer.Trainer
-  batch_size: 64
   ckpt_freq: 1
   device: cuda
-  epochs: 30
+  epochs: 300000
   loss_file: loss.txt
-  lr: 0.00005
   model_file: ckpts/pytorch_model
-  num_workers: 0
-  optimizer: torch.optim.AdamW
-  scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
-  scheduler_factor: 0.5
-  scheduler_patience: 5
-  scheduler_threshold: 0.0001
-  scheduler_verbose: True
-  shuffle: True
   eval_step: 1000
+  dataloader_params:
+    num_workers: 0
+    shuffle: True
+    batch_size: 64
+  optimizer: torch.optim.AdamW
+  optimizer_params:
+    lr: 0.003
+  scheduler: torch.optim.lr_scheduler.MultiStepLR
+  scheduler_params: 
+    milestones: [240000]
+    gamma: 0.1
+    verbose: True
 model:
   model: models.frcnn.FRCNNMobileNet
   ckpt: null

@@ -22,7 +22,7 @@ def main():
     args = parser.parse_args()
     print(args)
     cfg = args.cfg
-    # mode = args.mode
+    mode = args.mode
 
     cfg = load_config(cfg)
 
@@ -41,15 +41,12 @@ def main():
 
     # Create optimizer and schedular
     Optimizer = import_module(cfg["train"]["optimizer"])
-    params = [p for p in model.parameters() if p.requires_grad]
-    optimizer = Optimizer(params, lr=cfg["train"]["lr"])
+    optimizer = Optimizer(
+        model.parameters(), **cfg["train"]["optimizer_params"]
+    )
     Scheuler = import_module(cfg["train"]["scheduler"])
     scheduler = Scheuler(
-        optimizer=optimizer,
-        factor=cfg["train"]["scheduler_factor"],
-        patience=cfg["train"]["scheduler_patience"],
-        verbose=cfg["train"]["scheduler_verbose"],
-        threshold=cfg["train"]["scheduler_threshold"],
+        optimizer=optimizer, **cfg["train"]["scheduler_params"]
     )
 
     # Create dataset
@@ -58,23 +55,33 @@ def main():
     val_dataset = Dataset(cfg, is_train=False)
     train_dataloader = DataLoader(
         train_dataset,
-        cfg["train"]["batch_size"],
-        shuffle=cfg["train"]["shuffle"],
-        num_workers=cfg["train"]["num_workers"],
+        **cfg["train"]["dataloader_params"],
         collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
     )
     val_dataloader = DataLoader(
         val_dataset,
-        cfg["train"]["batch_size"],
-        shuffle=cfg["train"]["shuffle"],
-        num_workers=cfg["train"]["num_workers"],
+        **cfg["train"]["dataloader_params"],
         collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
     )
 
     # Train model
     Trainer = import_module(cfg["train"]["trainer"])
     trainer = Trainer(cfg, model, scheduler, optimizer)
-    trainer.train(train_dataloader, val_dataloader)
+    if mode == "train":
+        trainer.train(train_dataloader, val_dataloader)
+    else:
+        Dataset = import_module(cfg["dataset"]["dataset"])
+        test_dataset = Dataset(cfg, is_train=False)
+
+        cfg["train"]["dataloader_params"]["batch_size"] = 1
+        cfg["train"]["dataloader_params"]["num_workers"] = 0
+        test_dataloader = DataLoader(
+            test_dataset,
+            **cfg["train"]["dataloader_params"],
+            collate_fn=collate_fn if cfg["dataset"]["use_collate"] else None,
+        )
+
+        trainer.test(test_dataloader)
 
 
 if __name__ == "__main__":

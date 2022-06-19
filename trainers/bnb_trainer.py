@@ -31,10 +31,9 @@ class Trainer:
                 print_freq=100,
             )
 
+            self.scheduler.step()
+
             train_loss = train_log.loss.value
-            # reducing LR if no improvement
-            if self.scheduler is not None:
-                self.scheduler.step(train_loss)
             self.loss["val"].append(train_loss)
 
             evaluate(self.model, val_dataloader, device=self.device)
