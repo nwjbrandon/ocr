@@ -1,5 +1,6 @@
 import random
 
+import cv2
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -200,7 +201,7 @@ class MinstRecDataset(Dataset):
         return np.array(label)
 
     def __getitem__(self, idx):
-        paper_size = (300, 300)
+        paper_size = (50, 150)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
 
         n_char = random.randint(0, self.n_char - 1)
@@ -208,12 +209,24 @@ class MinstRecDataset(Dataset):
             self.mnist_trainset, n_char=n_char
         )
         paper, positions, _, _ = render_data_on_paper(
-            img, positions, max_scale=1.2, paper=paper.copy()
+            img, positions, padding=0, paper=paper.copy()
         )
+
+        if self.is_train or True:
+            # augmentation
+            k = random.randint(1, 3) * 2 + 1
+            n_iter = random.randint(1, 5)
+            is_thicker_font = random.randint(0, 1)
+
+            # Set different thickness
+            if is_thicker_font:
+                paper = cv2.erode(paper, (k, k), n_iter)
+            else:
+                paper = cv2.dilate(paper, (k, k), n_iter)
 
         text_gt = self._create_label(text)
         if self.is_visualise:
-            _, ax = plt.subplots(1, 1, figsize=(20, 20))
+            _, ax = plt.subplots(1, 1, figsize=(10, 10))
             ax.imshow(paper)
             ax.set_title(text)
             plt.show()
