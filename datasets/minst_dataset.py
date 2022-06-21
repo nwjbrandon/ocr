@@ -56,7 +56,6 @@ class MinstDensityDataset(Dataset):
         return self.n_data
 
     def __getitem__(self, idx):
-
         (
             paper,
             positions_list,
@@ -134,7 +133,6 @@ class MinstSegDataset(Dataset):
         return mask
 
     def __getitem__(self, idx):
-
         (
             paper,
             positions_list,
@@ -272,7 +270,6 @@ class MinstBnBDataset(Dataset):
         return self.n_data
 
     def __getitem__(self, idx):
-
         (
             paper,
             positions_list,
