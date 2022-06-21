@@ -35,7 +35,7 @@ class CharNet(nn.Module):
 
         self.flat = nn.Flatten(start_dim=2, end_dim=-1)
 
-        self.fc = nn.Linear(49, 4)
+        self.fc = nn.Linear(40, 4)
         self.outc = nn.Conv1d(512, 11, kernel_size=1)
 
     def forward(self, x):

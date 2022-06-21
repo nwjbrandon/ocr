@@ -135,6 +135,8 @@ def render_data_on_paper(
     img,
     positions,
     angle=None,
+    max_angle=None,
+    scale=None,
     max_scale=None,
     offset=None,
     padding=1,
@@ -146,14 +148,17 @@ def render_data_on_paper(
     paper_h, paper_w = paper.shape
 
     if angle is None:
-        angle = random.randint(-15, 15)
+        if max_angle is None:
+            max_angle = 5
+        angle = random.randint(-max_angle, max_angle)
     img, rotation_mat = rotate_image(img, angle)
     positions = rotate_points(positions, rotation_mat)
 
     h, w = img.shape
-    if max_scale is None:
-        max_scale = int(min(paper_h / h, paper_w / w) * 10) / 10
-    scale = random.uniform(0.8, max_scale)
+    if scale is None:
+        if max_scale is None:
+            max_scale = int(min(paper_h / h, paper_w / w) * 10) / 10
+        scale = random.uniform(0.8, max_scale)
     img = resize_image(img, scale)
     positions = scale_points(positions, scale)
 
@@ -164,7 +169,7 @@ def render_data_on_paper(
     else:
         offset_h = offset[0]
         offset_w = offset[1]
-    paper[offset_h + 1 : offset_h + h + 1, offset_w : offset_w + w] = img
+    paper[offset_h : offset_h + h, offset_w : offset_w + w] = img
     positions = translate_points(positions, offset_h, offset_w)
 
     return paper, positions, (offset_w, offset_h), (offset_w + w, offset_h + h)
