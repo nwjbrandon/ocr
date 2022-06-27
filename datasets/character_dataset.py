@@ -102,4 +102,8 @@ class CharacterRecDataset(Dataset):
 
         image = Image.fromarray(paper)
         image_inp = self.image_transform(image)
-        return {"image_inp": image_inp, "text_gt": text_gt}
+        return {
+            "image_inp": image_inp,
+            "text_gt": text_gt,
+            "text_length": len(text),
+        }
