@@ -30,5 +30,6 @@ train:
 model:
   model: models.charnet.CharNet
   in_channels: 1
+  n_char: 10
   n_classes: 24
   ckpt: null

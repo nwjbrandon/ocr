@@ -8,8 +8,8 @@ from torchvision import transforms
 from datasets.character_data import (
     CharacterDataset,
     generate_image_of_n_characters,
-    render_data_on_paper,
-    label_mapping_char_to_int
+    label_mapping_char_to_int,
+    render_data_on_paper
 )
 
 
@@ -40,7 +40,8 @@ class CharacterRecDataset(Dataset):
         return np.array(label)
 
     def __getitem__(self, idx):
-        img, text = generate_image_of_n_characters(self.dataset, n_char=9)
+        n_char = np.random.randint(0, self.n_char)
+        img, text = generate_image_of_n_characters(self.dataset, n_char=n_char)
 
         # Create paper
         paper_size = (224, 400)
@@ -86,14 +87,17 @@ class CharacterRecDataset(Dataset):
             else:
                 paper = cv2.dilate(paper, (k, k), n_iter)
 
+        text_gt = self._create_label(text)
+
         if self.is_visualise:
+            print("n_char:", len(text))
+            print("Encoded:", text_gt)
             paper = cv2.rectangle(paper, top_left, bot_right, 0, 2)
             plt.figure(figsize=(10, 10))
             plt.imshow(paper)
             plt.title(text)
             plt.show()
 
-        text_gt = self._create_label(text)
         image = Image.fromarray(paper)
         image_inp = self.image_transform(image)
         return {"image_inp": image_inp, "text_gt": text_gt}
