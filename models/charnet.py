@@ -1,9 +1,7 @@
 """ Full assembly of the parts to form the complete network """
 
 
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import torchvision
 
 
@@ -73,6 +71,7 @@ class CharSeqNet(nn.Module):
             self.gru_hidden_size * self.gru_num_layers,
             cfg["model"]["n_classes"],
         )
+        self.sm = nn.LogSoftmax(dim=2)
 
     def forward(self, x):
         x1 = self.inc(x)
@@ -80,7 +79,6 @@ class CharSeqNet(nn.Module):
         x2 = x2.permute(0, 3, 2, 1)
         x2 = self.flat(x2)
         x3, _ = self.gru(x2)
-        logits = torch.stack(
-            [F.log_softmax(self.fc(x3[i]), dim=-1) for i in range(x3.shape[0])]
-        )
+        x4 = self.fc(x3)
+        logits = self.sm(x4)
         return logits
