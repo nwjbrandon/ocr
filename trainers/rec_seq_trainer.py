@@ -144,7 +144,7 @@ class Trainer:
                 text_gt = text_gt.cpu().numpy()[0]
                 text_pred = text_pred.cpu().numpy()[0]
 
-                text_pred = np.argmax(text_pred, axis=0)
+                text_pred = np.argmax(text_pred, axis=1)
 
                 is_correct = np.array_equal(text_pred, text_gt)
                 if is_correct:
