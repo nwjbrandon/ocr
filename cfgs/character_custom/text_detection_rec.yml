@@ -1,6 +1,6 @@
 dataset:
   dataset: datasets.character_dataset.CharacterRecDataset
-  is_visualise: True
+  is_visualise: False
   n_data: 60000
   use_collate: False
   n_char: 4 # Increase to 10 characters

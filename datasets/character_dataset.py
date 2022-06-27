@@ -47,7 +47,7 @@ class CharacterRecDataset(Dataset):
         img, text = generate_image_of_n_characters(self.dataset, n_char=n_char)
 
         # Create paper
-        paper_size = (224, 400)
+        paper_size = (120, 400)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
 
         # # Create horizontal lines on paper
@@ -67,12 +67,10 @@ class CharacterRecDataset(Dataset):
 
         paper_h, paper_w = paper.shape
 
-        # Scale to max first
-        padding = 0
-        final_h, final_w = paper_h - padding, paper_w - padding
-        max_scale = min(final_w / img.shape[1], final_h / img.shape[0])
-        width = int(img.shape[1] * max_scale)
-        height = int(img.shape[0] * max_scale)
+        # Scale to fixed height
+        scale = 40 / img.shape[0]
+        width = int(img.shape[1] * scale)
+        height = int(img.shape[0] * scale)
         dsize = (width, height)
         img = cv2.resize(img, dsize)
 

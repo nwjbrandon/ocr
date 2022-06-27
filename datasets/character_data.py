@@ -190,7 +190,7 @@ def render_data_on_paper(img, paper):
     img, rotation_mat = rotate_image(img, angle)
 
     # Scale image
-    scale = np.random.uniform(0.5, 1)
+    scale = np.random.uniform(0.8, 3)
     img = resize_image(img, scale)
 
     # Translate image
