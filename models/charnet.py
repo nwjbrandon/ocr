@@ -35,12 +35,20 @@ class CharNet(nn.Module):
         self.flat = nn.Flatten(start_dim=2, end_dim=-1)
 
         self.fc = nn.Linear(52, cfg["model"]["n_char"])
-        self.outc = nn.Conv1d(512, cfg["model"]["n_classes"], kernel_size=1)
+
+        self.lstm1 = nn.LSTM(512, 64, 2, batch_first=True, bidirectional=True)
+        self.lstm2 = nn.LSTM(128, 32, 2, batch_first=True, bidirectional=True)
+
+        self.outc = nn.Conv1d(64, cfg["model"]["n_classes"], kernel_size=1)
 
     def forward(self, x):
         x1 = self.inc(x)
         x2 = self.backbone(x1)
         x3 = self.flat(x2)
         x4 = self.fc(x3)
-        logits = self.outc(x4)
+        x4 = x4.transpose(1, 2)
+        x5, _ = self.lstm1(x4)
+        x6, _ = self.lstm2(x5)
+        x6 = x6.transpose(1, 2)
+        logits = self.outc(x6)
         return logits

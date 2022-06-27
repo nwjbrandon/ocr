@@ -101,8 +101,7 @@ def generate_image_of_n_characters(dataset, n_char=3):
 
     # Combine images of characters
     for _ in range(n_char):
-        offset = np.random.randint(0, 100)
-        offset = 100
+        offset = np.random.randint(0, 20)
         n2 = np.random.randint(0, len(dataset) - 1)
         img2 = dataset[n2][0]
         text += label_mapping_int_to_char[dataset[n2][1]]
