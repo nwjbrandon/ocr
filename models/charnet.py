@@ -26,7 +26,6 @@ class CharNet(nn.Module):
     def __init__(self, cfg, bilinear=False):
         super(CharNet, self).__init__()
         self.in_channels = cfg["model"]["in_channels"]
-        self.out_channels = cfg["model"]["out_channels"]
 
         self.inc = DownConv(self.in_channels, 3)
         resnet_net = torchvision.models.resnet18(pretrained=True)
@@ -35,8 +34,8 @@ class CharNet(nn.Module):
 
         self.flat = nn.Flatten(start_dim=2, end_dim=-1)
 
-        self.fc = nn.Linear(40, 4)
-        self.outc = nn.Conv1d(512, 11, kernel_size=1)
+        self.fc = nn.Linear(91, 10)
+        self.outc = nn.Conv1d(512, cfg["model"]["n_classes"], kernel_size=1)
 
     def forward(self, x):
         x1 = self.inc(x)

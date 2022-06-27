@@ -1,0 +1,34 @@
+dataset:
+  dataset: datasets.character_dataset.CharacterRecDataset
+  is_visualise: False
+  n_data: 10000
+  use_collate: False
+  n_char: 10
+  n_classes: 24 # 13 characters + 1 EOF token
+train:
+  trainer: trainers.rec_trainer.Trainer
+  ckpt_freq: 1
+  device: cuda
+  epochs: 300
+  loss_file: loss.txt
+  model_file: ckpts/pytorch_model
+  eval_step: 1000
+  dataloader_params:
+    num_workers: 4
+    shuffle: True
+    batch_size: 64
+  optimizer: torch.optim.RMSprop
+  optimizer_params:
+    lr: 0.00001
+    weight_decay: 0.00000001
+    momentum: 0.9
+  scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
+  scheduler_params:
+    mode: max
+    patience: 2
+    verbose: True
+model:
+  model: models.charnet.CharNet
+  in_channels: 1
+  n_classes: 24
+  ckpt: null
