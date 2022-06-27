@@ -28,10 +28,13 @@ class CharacterRecDataset(Dataset):
             print("Size of val set", len(self.dataset))
 
         self.n_data = cfg["dataset"]["n_data"]
-        self.image_transform = transforms.Compose([transforms.ToTensor(),])
+        self.image_transform = transforms.Compose(
+            [transforms.Resize(120), transforms.ToTensor(),]
+        )
 
     def __len__(self):
-        return self.n_data
+        # return self.n_data
+        return 60000 if self.is_train else 10000
 
     def _create_label(self, text):
         label = [0 for _ in range(self.n_char)]
@@ -47,20 +50,20 @@ class CharacterRecDataset(Dataset):
         paper_size = (224, 400)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
 
-        # Create horizontal lines on paper
-        spacing = np.random.randint(50, 100)
-        line_color = np.random.randint(0, 100)
-        line_thickness = np.random.randint(1, 2)
-        line_slant = np.random.randint(-10, 10)
-        for i in range(0, len(paper), spacing):
-            paper = cv2.line(
-                paper,
-                (0, i + line_slant),
-                (paper.shape[1], i - line_slant),
-                line_color,
-                line_thickness,
-            )
-        paper = cv2.blur(paper, (5, 5))
+        # # Create horizontal lines on paper
+        # spacing = np.random.randint(50, 100)
+        # line_color = np.random.randint(0, 100)
+        # line_thickness = np.random.randint(1, 2)
+        # line_slant = np.random.randint(-10, 10)
+        # for i in range(0, len(paper), spacing):
+        #     paper = cv2.line(
+        #         paper,
+        #         (0, i + line_slant),
+        #         (paper.shape[1], i - line_slant),
+        #         line_color,
+        #         line_thickness,
+        #     )
+        # paper = cv2.blur(paper, (5, 5))
 
         paper_h, paper_w = paper.shape
 

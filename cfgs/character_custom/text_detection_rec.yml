@@ -1,9 +1,9 @@
 dataset:
   dataset: datasets.character_dataset.CharacterRecDataset
-  is_visualise: False
-  n_data: 10000
+  is_visualise: True
+  n_data: 60000
   use_collate: False
-  n_char: 10
+  n_char: 4 # Increase to 10 characters
   n_classes: 24 # 13 characters + 1 EOF token
 train:
   trainer: trainers.rec_trainer.Trainer
@@ -24,12 +24,12 @@ train:
     momentum: 0.9
   scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
   scheduler_params:
-    mode: max
-    patience: 2
+    mode: min
+    patience: 5
     verbose: True
 model:
   model: models.charnet.CharNet
   in_channels: 1
-  n_char: 10
+  n_char: 4 # Increase to 10 characters
   n_classes: 24
   ckpt: null
