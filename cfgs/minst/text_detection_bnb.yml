@@ -25,5 +25,8 @@ train:
     gamma: 0.1
     verbose: True
 model:
-  model: models.frcnn.FRCNNMobileNet
+  model: models.charnet.CharNet
+  in_channels: 1
+  n_char: 4 # Increase to 10 characters
+  n_classes: 11
   ckpt: null
