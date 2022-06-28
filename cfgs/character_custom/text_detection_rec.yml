@@ -27,8 +27,9 @@ train:
     mode: min
     patience: 5
     verbose: True
+# RuntimeError: mat1 and mat2 shapes cannot be multiplied (512x52 and 40x4)
 model:
-  model: models.charnet.CharNet
+  model: models.charnet.CharNet # Perform exponentially worse for longer sequence
   in_channels: 1
   n_char: 4 # Increase to 10 characters
   n_classes: 24
