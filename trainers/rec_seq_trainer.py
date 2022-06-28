@@ -171,6 +171,10 @@ class Trainer:
 
                 text_pred = np.argmax(text_pred, axis=1)
 
+                # print(
+                #     "text_gt:", text_gt, "text_pred:", text_pred,
+                # )
+
                 text_pred = self.extract_text_pred(text_pred)
                 text_gt = self.extract_text_gt(text_gt)
 

@@ -50,20 +50,21 @@ class CharacterRecDataset(Dataset):
         paper_size = (120, 400)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
 
-        # # Create horizontal lines on paper
-        # spacing = np.random.randint(50, 100)
-        # line_color = np.random.randint(0, 100)
-        # line_thickness = np.random.randint(1, 2)
-        # line_slant = np.random.randint(-10, 10)
-        # for i in range(0, len(paper), spacing):
-        #     paper = cv2.line(
-        #         paper,
-        #         (0, i + line_slant),
-        #         (paper.shape[1], i - line_slant),
-        #         line_color,
-        #         line_thickness,
-        #     )
-        # paper = cv2.blur(paper, (5, 5))
+        # Create horizontal lines on paper
+        spacing = np.random.randint(50, 100)
+        line_color = np.random.randint(0, 100)
+        line_thickness = np.random.randint(1, 2)
+        line_slant = np.random.randint(-10, 10)
+        for i in range(0, len(paper), spacing):
+            paper = cv2.line(
+                paper,
+                (0, i + line_slant),
+                (paper.shape[1], i - line_slant),
+                line_color,
+                line_thickness,
+            )
+        kernel_size = np.random.choice([1, 3, 5])
+        paper = cv2.blur(paper, (kernel_size, kernel_size))
 
         paper_h, paper_w = paper.shape
 
