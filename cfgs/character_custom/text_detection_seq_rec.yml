@@ -5,6 +5,8 @@ dataset:
   use_collate: False
   n_char: 10 # Increase to 10 characters
   n_classes: 24 # 13 characters + 1 EOF token
+  train_dir: my_data/train/**/*
+  val_dir: my_data/val/**/*
 train:
   trainer: trainers.rec_seq_trainer.Trainer
   ckpt_freq: 1

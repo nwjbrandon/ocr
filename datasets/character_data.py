@@ -1,3 +1,5 @@
+import glob
+
 import cv2
 import numpy as np
 from PIL import Image
@@ -34,32 +36,8 @@ label_mapping_char_to_int = {
 
 
 class CharacterDataset(Dataset):
-    def __init__(self):
-        self.dataset = [
-            "my_data/nwjbrandon_20220701_big_1.jpg",
-            "my_data/nwjbrandon_20220701_big_2.jpg",
-            "my_data/nwjbrandon_20220701_big_3.jpg",
-            "my_data/nwjbrandon_20220701_big_4.jpg",
-            "my_data/nwjbrandon_20220701_big_5.jpg",
-            "my_data/nwjbrandon_20220701_big_6.jpg",
-            "my_data/nwjbrandon_20220701_big_7.jpg",
-            "my_data/nwjbrandon_20220701_big_8.jpg",
-            "my_data/nwjbrandon_20220701_big_9.jpg",
-            "my_data/nwjbrandon_20220701_big_0.jpg",
-            "my_data/nwjbrandon_20220701_big_a.jpg",
-            "my_data/nwjbrandon_20220701_big_b.jpg",
-            "my_data/nwjbrandon_20220701_big_c.jpg",
-            "my_data/nwjbrandon_20220701_big_d.jpg",
-            "my_data/nwjbrandon_20220701_big_e.jpg",
-            "my_data/nwjbrandon_20220701_big_f.jpg",
-            "my_data/nwjbrandon_20220701_big_g.jpg",
-            "my_data/nwjbrandon_20220701_big_h.jpg",
-            "my_data/nwjbrandon_20220701_big_i.jpg",
-            "my_data/nwjbrandon_20220701_big_j.jpg",
-            "my_data/nwjbrandon_20220701_big_v.jpg",
-            "my_data/nwjbrandon_20220701_big_(.jpg",
-            "my_data/nwjbrandon_20220701_big_).jpg",
-        ]
+    def __init__(self, data_dir):
+        self.dataset = glob.glob(data_dir)
         self.n_data = len(self.dataset)
 
     def __len__(self):

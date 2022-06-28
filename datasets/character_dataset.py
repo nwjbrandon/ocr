@@ -20,11 +20,11 @@ class CharacterRecDataset(Dataset):
         self.is_train = is_train
 
         if self.is_train:
-            self.dataset = CharacterDataset()
+            self.dataset = CharacterDataset(cfg["dataset"]["train_dir"])
             print("Size of train set", len(self.dataset))
 
         else:
-            self.dataset = CharacterDataset()
+            self.dataset = CharacterDataset(cfg["dataset"]["val_dir"])
             print("Size of val set", len(self.dataset))
 
         self.n_data = cfg["dataset"]["n_data"]
