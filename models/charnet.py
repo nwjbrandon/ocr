@@ -54,7 +54,7 @@ class CharSeqNet(nn.Module):
         self.gru_num_layers = 2
 
         self.inc = DownConv(self.in_channels, 3)
-        resnet_net = torchvision.models.resnet18(pretrained=True)
+        resnet_net = torchvision.models.resnet34(pretrained=True)
         modules = list(resnet_net.children())[:-2]
         self.backbone = nn.Sequential(*modules)
 
