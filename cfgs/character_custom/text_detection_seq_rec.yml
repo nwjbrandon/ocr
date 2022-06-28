@@ -1,32 +1,33 @@
 dataset:
-  dataset: datasets.minst_dataset.MinstDensityDataset
+  dataset: datasets.character_dataset.CharacterRecDataset
   is_visualise: False
   n_data: 60000
-  img_training_size: 200
   use_collate: False
+  n_char: 10 # Increase to 10 characters
+  n_classes: 24 # 13 characters + 1 EOF token
 train:
-  trainer: trainers.density_trainer.Trainer
+  trainer: trainers.rec_seq_trainer.Trainer
   ckpt_freq: 1
   device: cuda
-  epochs: 30
+  epochs: 300
   loss_file: loss.txt
   model_file: ckpts/pytorch_model
   eval_step: 1000
   dataloader_params:
-    num_workers: 0
+    num_workers: 8
     shuffle: True
-    batch_size: 4
+    batch_size: 64
   optimizer: torch.optim.AdamW
   optimizer_params:
-    lr: 0.00005
+    lr: 0.001
   scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
   scheduler_params:
-    factor: 0.5
+    mode: min
     patience: 5
-    threshold: 0.0001
     verbose: True
 model:
-  model: models.unet.UNet
+  model: models.charnet.CharSeqNet
   in_channels: 1
-  out_channels: 2
+  n_char: 10 # Increase to 10 characters
+  n_classes: 24
   ckpt: null

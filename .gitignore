@@ -1,4 +1,5 @@
 data/
+my_data/
 __pycache__/
 ckpts/
 

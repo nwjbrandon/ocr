@@ -147,6 +147,13 @@ class Trainer:
                 is_correct = np.array_equal(text_pred, text_gt)
                 if is_correct:
                     n_corrects += 1
-                # print("text_gt:", text_gt, "text_pred:", text_pred, "correct:", is_correct)
+                # print(
+                #     "text_gt:",
+                #     text_gt,
+                #     "text_pred:",
+                #     text_pred,
+                #     "correct:",
+                #     is_correct,
+                # )
                 # input("Enter to view next")
         print("Accuracy:", n_corrects / len(dataloader) * 100)

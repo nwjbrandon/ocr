@@ -1,14 +1,7 @@
-import matplotlib
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from tqdm import tqdm
-
-from utils.losses import dice_loss
-
-matplotlib.use("TKAgg")
 
 
 class Trainer:
@@ -17,7 +10,9 @@ class Trainer:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
-        self.criterion1 = nn.CrossEntropyLoss()
+        self.criterion1 = nn.CTCLoss(
+            blank=0, reduction="mean", zero_infinity=True
+        )
 
         self.n_classes = cfg["dataset"]["n_classes"]
 
@@ -76,17 +71,23 @@ class Trainer:
 
         for i, data in enumerate(tqdm(train_dataloader), 0):
             image_inp = data["image_inp"].float()
-            mask_gt = data["mask_gt"]
+            text_gt = data["text_gt"]
+            text_length_gt = data["text_length"]
 
             image_inp = image_inp.to(self.device)
-            mask_gt = mask_gt.to(self.device)
+            text_gt = text_gt.to(self.device)
 
             self.optimizer.zero_grad()
 
-            mask_pred = self.model(image_inp)
+            text_pred = self.model(image_inp)
 
-            losses = self.criterion(mask_pred, mask_gt)
+            text_pred = text_pred.permute(1, 0, 2)
+            C, B, _ = text_pred.shape
+            text_length_pred = torch.IntTensor(B).fill_(C)
 
+            losses = self.criterion(
+                text_pred, text_gt, text_length_pred, text_length_gt
+            )
             losses.backward()
             self.optimizer.step()
             running_loss.append(losses.item())
@@ -102,47 +103,92 @@ class Trainer:
         with torch.no_grad():
             for i, data in enumerate(tqdm(dataloader), 0):
                 image_inp = data["image_inp"].float()
-                mask_gt = data["mask_gt"]
+                text_gt = data["text_gt"]
+                text_length_gt = data["text_length"]
 
                 image_inp = image_inp.to(self.device)
-                mask_gt = mask_gt.to(self.device)
+                text_gt = text_gt.to(self.device)
 
-                mask_pred = self.model(image_inp)
+                text_pred = self.model(image_inp)
 
-                losses = self.criterion(mask_pred, mask_gt)
+                text_pred = text_pred.permute(1, 0, 2)
+                C, B, _ = text_pred.shape
+                text_length_pred = torch.IntTensor(B).fill_(C)
 
+                losses = self.criterion(
+                    text_pred, text_gt, text_length_pred, text_length_gt
+                )
                 running_loss.append(losses.item())
 
         epoch_loss = np.mean(running_loss)
         self.loss["val"].append(epoch_loss)
 
-    def criterion(self, mask_pred, mask_gt):
-        loss = self.criterion1(mask_pred, mask_gt) + dice_loss(
-            F.softmax(mask_pred, dim=1).float(),
-            F.one_hot(mask_gt, self.n_classes).permute(0, 3, 1, 2).float(),
-            multiclass=True,
-        )
-        return loss
+    def criterion(self, y_pred, y_train, input_lengths, target_lengths):
+        return self.criterion1(y_pred, y_train, input_lengths, target_lengths)
+
+    def extract_text_pred(self, seq):
+        deduplicate_seq = []
+        n_tokens = len(seq)
+        for i in range(n_tokens):
+            token = seq[i]
+            if len(deduplicate_seq) == 0:
+                deduplicate_seq.append(token)
+            else:
+                if seq[i - 1] != token:
+                    deduplicate_seq.append(token)
+        res = []
+        for i in range(len(deduplicate_seq)):
+            token = deduplicate_seq[i]
+            if token != 0:
+                res.append(token)
+        return np.array(res)
+
+    def extract_text_gt(self, seq):
+        res = []
+        for i in range(len(seq)):
+            token = seq[i]
+            if token != 0:
+                res.append(token)
+        return np.array(res)
 
     def test(self, dataloader):
         self.model.eval()
 
+        n_corrects = 0
+
         with torch.no_grad():
             for i, data in enumerate(tqdm(dataloader), 0):
                 image_inp = data["image_inp"].float()
-                mask_gt = data["mask_gt"]
+                text_gt = data["text_gt"]
 
                 image_inp = image_inp.to(self.device)
-                mask_gt = mask_gt.to(self.device)
+                text_gt = text_gt.to(self.device)
 
-                mask_pred = self.model(image_inp)
+                text_pred = self.model(image_inp)
 
-                mask_gt = mask_gt.cpu().numpy()[0]
-                mask_pred = mask_pred.cpu().numpy()[0]
+                text_gt = text_gt.cpu().numpy()[0]
+                text_pred = text_pred.cpu().numpy()[0]
 
-                _, ax = plt.subplots(1, 2)
-                ax[0].imshow(mask_gt)
-                ax[0].set_title("True")
-                ax[1].imshow(mask_pred[1])
-                ax[1].set_title("Pred")
-                plt.show()
+                text_pred = np.argmax(text_pred, axis=1)
+
+                # print(
+                #     "text_gt:", text_gt, "text_pred:", text_pred,
+                # )
+
+                text_pred = self.extract_text_pred(text_pred)
+                text_gt = self.extract_text_gt(text_gt)
+
+                is_correct = np.array_equal(text_pred, text_gt)
+                if is_correct:
+                    n_corrects += 1
+
+                # print(
+                #     "text_gt:",
+                #     text_gt,
+                #     "text_pred:",
+                #     text_pred,
+                #     "correct:",
+                #     is_correct,
+                # )
+                # input("Enter to view next")
+        print("Accuracy:", n_corrects / len(dataloader) * 100)
