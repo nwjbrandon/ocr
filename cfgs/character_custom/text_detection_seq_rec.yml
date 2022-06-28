@@ -3,7 +3,7 @@ dataset:
   is_visualise: False
   n_data: 60000
   use_collate: False
-  n_char: 4 # Increase to 10 characters
+  n_char: 10 # Increase to 10 characters
   n_classes: 24 # 13 characters + 1 EOF token
 train:
   trainer: trainers.rec_seq_trainer.Trainer
@@ -14,7 +14,7 @@ train:
   model_file: ckpts/pytorch_model
   eval_step: 1000
   dataloader_params:
-    num_workers: 4
+    num_workers: 8
     shuffle: True
     batch_size: 64
   optimizer: torch.optim.AdamW
@@ -28,6 +28,6 @@ train:
 model:
   model: models.charnet.CharSeqNet
   in_channels: 1
-  n_char: 4 # Increase to 10 characters
+  n_char: 10 # Increase to 10 characters
   n_classes: 24
   ckpt: null
