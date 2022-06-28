@@ -126,6 +126,31 @@ class Trainer:
     def criterion(self, y_pred, y_train, input_lengths, target_lengths):
         return self.criterion1(y_pred, y_train, input_lengths, target_lengths)
 
+    def extract_text_pred(self, seq):
+        deduplicate_seq = []
+        n_tokens = len(seq)
+        for i in range(n_tokens):
+            token = seq[i]
+            if len(deduplicate_seq) == 0:
+                deduplicate_seq.append(token)
+            else:
+                if seq[i - 1] != token:
+                    deduplicate_seq.append(token)
+        res = []
+        for i in range(len(deduplicate_seq)):
+            token = deduplicate_seq[i]
+            if token != 0:
+                res.append(token)
+        return np.array(res)
+
+    def extract_text_gt(self, seq):
+        res = []
+        for i in range(len(seq)):
+            token = seq[i]
+            if token != 0:
+                res.append(token)
+        return np.array(res)
+
     def test(self, dataloader):
         self.model.eval()
 
@@ -146,9 +171,13 @@ class Trainer:
 
                 text_pred = np.argmax(text_pred, axis=1)
 
+                text_pred = self.extract_text_pred(text_pred)
+                text_gt = self.extract_text_gt(text_gt)
+
                 is_correct = np.array_equal(text_pred, text_gt)
                 if is_correct:
                     n_corrects += 1
+
                 # print(
                 #     "text_gt:",
                 #     text_gt,

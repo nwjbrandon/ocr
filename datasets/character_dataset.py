@@ -89,7 +89,7 @@ class CharacterRecDataset(Dataset):
                 paper = cv2.dilate(paper, (k, k), n_iter)
 
         text_gt = self._create_label(text)
-        ret, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
+        # ret, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
 
         if self.is_visualise:
             print("n_char:", len(text))
