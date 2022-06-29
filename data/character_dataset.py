@@ -50,21 +50,21 @@ class CharacterRecDataset(Dataset):
         paper_size = (120, 400)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
 
-        # Create horizontal lines on paper
-        spacing = np.random.randint(50, 100)
-        line_color = np.random.randint(0, 100)
-        line_thickness = np.random.randint(1, 2)
-        line_slant = np.random.randint(-10, 10)
-        for i in range(0, len(paper), spacing):
-            paper = cv2.line(
-                paper,
-                (0, i + line_slant),
-                (paper.shape[1], i - line_slant),
-                line_color,
-                line_thickness,
-            )
-        kernel_size = np.random.choice([1, 3, 5])
-        paper = cv2.blur(paper, (kernel_size, kernel_size))
+        # # Create horizontal lines on paper
+        # spacing = np.random.randint(50, 100)
+        # line_color = np.random.randint(0, 100)
+        # line_thickness = np.random.randint(1, 2)
+        # line_slant = np.random.randint(-10, 10)
+        # for i in range(0, len(paper), spacing):
+        #     paper = cv2.line(
+        #         paper,
+        #         (0, i + line_slant),
+        #         (paper.shape[1], i - line_slant),
+        #         line_color,
+        #         line_thickness,
+        #     )
+        # kernel_size = np.random.choice([1, 3, 5])
+        # paper = cv2.blur(paper, (kernel_size, kernel_size))
 
         paper_h, paper_w = paper.shape
 
@@ -77,20 +77,20 @@ class CharacterRecDataset(Dataset):
 
         paper, top_left, bot_right = render_data_on_paper(img, paper)
 
-        if self.is_train:
-            # augmentation
-            k = np.random.randint(1, 3) * 2 + 1
-            n_iter = np.random.randint(1, 5)
-            is_thicker_font = np.random.randint(0, 1)
+        # if self.is_train:
+        #     # augmentation
+        #     k = np.random.randint(1, 3) * 2 + 1
+        #     n_iter = np.random.randint(1, 5)
+        #     is_thicker_font = np.random.randint(0, 1)
 
-            # Set different thickness
-            if is_thicker_font:
-                paper = cv2.erode(paper, (k, k), n_iter)
-            else:
-                paper = cv2.dilate(paper, (k, k), n_iter)
+        #     # Set different thickness
+        #     if is_thicker_font:
+        #         paper = cv2.erode(paper, (k, k), n_iter)
+        #     else:
+        #         paper = cv2.dilate(paper, (k, k), n_iter)
 
         text_gt = self._create_label(text)
-        # ret, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
+        ret, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
 
         if self.is_visualise:
             print("n_char:", len(text))

@@ -53,8 +53,8 @@ class Trainer:
             with open(self.loss_file, "a") as f:
                 f.write(f"{log}\n")
 
-            # reducing LR if no improvement
-            self.scheduler.step()
+            lr = self.scheduler.get_last_lr()
+            print("lr:", lr)
 
             # saving model
             if (epoch + 1) % self.ckpt_freq == 0:
@@ -89,7 +89,10 @@ class Trainer:
                 text_pred, text_gt, text_length_pred, text_length_gt
             )
             losses.backward()
+            nn.utils.clip_grad_norm_(self.model.parameters(), 10.0)
             self.optimizer.step()
+            self.scheduler.step()
+
             running_loss.append(losses.item())
 
         epoch_loss = np.mean(running_loss)
