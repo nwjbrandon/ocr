@@ -52,10 +52,8 @@ class CharSeqNet(nn.Module):
         self.T = cfg["model"]["n_char"] * 2 + 1
 
         self.backbone = m_resnet.create_resnet18()
-        self.flat = nn.Flatten(start_dim=1, end_dim=2)
-
-        self.t_out = nn.Sequential(nn.Linear(13, self.T),)
-
+        self.t_out = nn.Conv2d(13, self.T, kernel_size=1)
+        self.flat = nn.Flatten(start_dim=2, end_dim=3)
         self.c_out = nn.Sequential(
             nn.Conv1d(1024, 512, kernel_size=3, padding=1),
             nn.BatchNorm1d(512),
@@ -67,8 +65,10 @@ class CharSeqNet(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-        x = self.flat(x)
+        x = x.permute(0, 3, 2, 1)
         x = self.t_out(x)
+        x = self.flat(x)
+        x = x.permute(0, 2, 1)
         x = self.c_out(x)
         x = x.permute(0, 2, 1)
         logits = self.sm(x)
@@ -83,7 +83,7 @@ class CharSeqGruNet(nn.Module):
         self.gru_hidden_size = 128
         self.gru_num_layers = 2
         self.gru_in_channels = 1024
-        self.T = cfg["model"]["n_char"] * 2 - 1
+        self.T = cfg["model"]["n_char"] * 2 + 1
 
         self.backbone = m_resnet.create_resnet18()
         self.t_out = nn.Conv2d(13, self.T, kernel_size=1)
