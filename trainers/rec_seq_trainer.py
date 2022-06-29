@@ -54,7 +54,7 @@ class Trainer:
                 f.write(f"{log}\n")
 
             # reducing LR if no improvement
-            self.scheduler.step(self.loss["val"][-1])
+            self.scheduler.step()
 
             # saving model
             if (epoch + 1) % self.ckpt_freq == 0:
@@ -124,7 +124,10 @@ class Trainer:
         self.loss["val"].append(epoch_loss)
 
     def criterion(self, y_pred, y_train, input_lengths, target_lengths):
-        return self.criterion1(y_pred, y_train, input_lengths, target_lengths)
+        ctc_loss = self.criterion1(
+            y_pred, y_train, input_lengths, target_lengths
+        )
+        return ctc_loss
 
     def extract_text_pred(self, seq):
         deduplicate_seq = []

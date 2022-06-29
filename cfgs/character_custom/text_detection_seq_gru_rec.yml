@@ -28,7 +28,7 @@ train:
     gamma: 0.5
     verbose: True
 model:
-  model: models.charnet.CharSeqNet
+  model: models.charnet.CharSeqGruNet
   in_channels: 1
   n_char: 10 # Increase to 10 characters
   n_classes: 24 # 10 digits + 13 characters + 1 EOF token

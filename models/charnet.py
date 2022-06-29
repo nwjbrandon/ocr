@@ -1,6 +1,3 @@
-""" Full assembly of the parts to form the complete network """
-
-
 import torch.nn as nn
 import torchvision
 
@@ -52,15 +49,46 @@ class CharSeqNet(nn.Module):
     def __init__(self, cfg):
         super(CharSeqNet, self).__init__()
         self.in_channels = cfg["model"]["in_channels"]
-        self.gru_hidden_size = 128
-        self.gru_num_layers = 2
-        self.gru_in_channels = 4096
+        self.T = cfg["model"]["n_char"] * 2 + 1
 
         self.backbone = m_resnet.create_resnet18()
+        self.flat = nn.Flatten(start_dim=1, end_dim=2)
 
-        self.fc1 = nn.Linear(25, cfg["model"]["n_char"] * 2 + 1,)
+        self.t_out = nn.Sequential(nn.Linear(13, self.T),)
 
-        self.flat = nn.Flatten(start_dim=2, end_dim=-1)
+        self.c_out = nn.Sequential(
+            nn.Conv1d(1024, 512, kernel_size=3, padding=1),
+            nn.BatchNorm1d(512),
+            nn.Conv1d(512, 128, kernel_size=3, padding=1),
+            nn.BatchNorm1d(128),
+            nn.Conv1d(128, cfg["model"]["n_classes"], kernel_size=1),
+        )
+        self.sm = nn.LogSoftmax(dim=2)
+
+    def forward(self, x):
+        x = self.backbone(x)
+        x = self.flat(x)
+        x = self.t_out(x)
+        x = self.c_out(x)
+        x = x.permute(0, 2, 1)
+        logits = self.sm(x)
+        # logits.shape: B, T, C (64, 21, 24)
+        return logits
+
+
+class CharSeqGruNet(nn.Module):
+    def __init__(self, cfg):
+        super(CharSeqGruNet, self).__init__()
+        self.in_channels = cfg["model"]["in_channels"]
+        self.gru_hidden_size = 128
+        self.gru_num_layers = 2
+        self.gru_in_channels = 1024
+        self.T = cfg["model"]["n_char"] * 2 + 1
+
+        self.backbone = m_resnet.create_resnet18()
+        self.flat = nn.Flatten(start_dim=1, end_dim=2)
+
+        self.t_out = nn.Sequential(nn.Linear(13, self.T),)
         self.gru = nn.GRU(
             self.gru_in_channels,
             self.gru_hidden_size,
@@ -68,20 +96,21 @@ class CharSeqNet(nn.Module):
             batch_first=True,
             bidirectional=True,
         )
-        self.fc2 = nn.Linear(
-            self.gru_hidden_size * self.gru_num_layers,
-            cfg["model"]["n_classes"],
+        self.c_out = nn.Sequential(
+            nn.Linear(
+                self.gru_hidden_size * self.gru_num_layers,
+                cfg["model"]["n_classes"],
+            )
         )
         self.sm = nn.LogSoftmax(dim=2)
 
     def forward(self, x):
-        x1 = self.backbone(x)
-
-        x2 = self.fc1(x1)
-        x2 = x2.permute(0, 3, 2, 1)
-        x2 = self.flat(x2)
-
-        x3, _ = self.gru(x2)
-        x4 = self.fc2(x3)
-        logits = self.sm(x4)
+        x = self.backbone(x)
+        x = self.flat(x)
+        x = self.t_out(x)
+        x = x.permute(0, 2, 1)
+        x, _ = self.gru(x)
+        x = self.c_out(x)
+        logits = self.sm(x)
+        # logits.shape: B, T, C (64, 21, 24)
         return logits
