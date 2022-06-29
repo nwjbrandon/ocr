@@ -1,5 +1,6 @@
-data/
 my_data/
+minst_data/
+
 __pycache__/
 ckpts/
 

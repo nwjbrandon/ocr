@@ -106,7 +106,7 @@ class MinstBnBDataset(Dataset):
 
         if self.is_train:
             self.mnist_trainset = datasets.MNIST(
-                root="./data",
+                root="./minst_data",
                 train=self.is_train,
                 download=True,
                 transform=None,
@@ -116,7 +116,7 @@ class MinstBnBDataset(Dataset):
 
         else:
             self.mnist_trainset = datasets.MNIST(
-                root="./data",
+                root="./minst_data",
                 train=self.is_train,
                 download=True,
                 transform=None,
