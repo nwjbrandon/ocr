@@ -1,5 +1,5 @@
 dataset:
-  dataset: datasets.minst_dataset.MinstBnBDataset
+  dataset: data.minst_dataset.MinstBnBDataset
   is_visualise: False
   n_data: 60000
   img_training_size: 200

@@ -1,5 +1,5 @@
 dataset:
-  dataset: datasets.minst_dataset.MinstRecDataset
+  dataset: data.minst_dataset.MinstRecDataset
   is_visualise: False
   n_data: 60000
   img_training_size: 100

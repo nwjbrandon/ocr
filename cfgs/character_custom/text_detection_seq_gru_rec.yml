@@ -1,5 +1,5 @@
 dataset:
-  dataset: datasets.character_dataset.CharacterRecDataset
+  dataset: data.character_dataset.CharacterRecDataset
   is_visualise: False
   n_data: 60000
   use_collate: False

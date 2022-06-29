@@ -5,7 +5,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from datasets.character_data import (
+from data.character_data import (
     CharacterDataset,
     generate_image_of_n_characters,
     label_mapping_char_to_int,

@@ -10,7 +10,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from datasets.minst_data import (
+from data.minst_data import (
     generate_data_of_n_characters,
     render_data_on_paper,
     render_multiple_data_on_paper,
