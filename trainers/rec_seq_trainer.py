@@ -42,19 +42,17 @@ class Trainer:
         for epoch in range(start_epoch, self.epochs):
             self._epoch_train(train_dataloader)
             self._epoch_eval(val_dataloader)
-
-            log = "Epoch: {}/{}, Train Loss={}, Val Loss={}".format(
+            lr = self.scheduler.get_last_lr()
+            log = "Epoch: {}/{}, Train Loss={}, Val Loss={}, LR={}".format(
                 epoch + 1,
                 self.epochs,
                 np.round(self.loss["train"][-1], 10),
                 np.round(self.loss["val"][-1], 10),
+                np.round(lr[0]),
             )
             print(log)
             with open(self.loss_file, "a") as f:
                 f.write(f"{log}\n")
-
-            lr = self.scheduler.get_last_lr()
-            print("lr:", lr)
 
             # saving model
             if (epoch + 1) % self.ckpt_freq == 0:
@@ -89,7 +87,7 @@ class Trainer:
                 text_pred, text_gt, text_length_pred, text_length_gt
             )
             losses.backward()
-            nn.utils.clip_grad_norm_(self.model.parameters(), 10.0)
+            nn.utils.clip_grad_norm_(self.model.parameters(), 0.5)
             self.optimizer.step()
             self.scheduler.step()
 

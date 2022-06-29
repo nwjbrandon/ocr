@@ -47,6 +47,7 @@ class CharacterDataset(Dataset):
         img_fname = self.dataset[idx]
         image = Image.open(img_fname).convert("L")
         image = np.uint8(image)
+        image = cv2.resize(image, (40, 40))
 
         img_fname = img_fname.split(".")[0]
         label = img_fname.split("_")[-1]
@@ -79,7 +80,7 @@ def generate_image_of_n_characters(dataset, n_char=3):
 
     # Combine images of characters
     for _ in range(n_char):
-        offset = np.random.randint(0, 20)
+        offset = np.random.randint(5, 15)
         n2 = np.random.randint(0, len(dataset) - 1)
         img2 = dataset[n2][0]
         text += label_mapping_int_to_char[dataset[n2][1]]
@@ -159,32 +160,23 @@ def scale_points(points, scale):
     return [(int(pt[0] * scale), int(pt[1] * scale)) for pt in points]
 
 
-def render_data_on_paper(img, paper):
+def render_data_on_paper(img, paper, fill=True, padding=5):
     paper_h, paper_w = paper.shape
 
     # Rotate image
     angle = np.random.randint(-5, 5)
     img, rotation_mat = rotate_image(img, angle)
 
-    # Scale image
-    scale = np.random.uniform(1, 3)
-    img = resize_image(img, scale)
+    # Scale to full
+    h, w = img.shape[:2]
+    H, W = paper.shape[:2]
+    scale = min(H / h, W / w)
+    width = int(img.shape[1] * scale) - padding
+    height = int(img.shape[0] * scale) - padding
+    dsize = (width, height)
+    img = cv2.resize(img, dsize)
 
     # Translate image
-    h, w = img.shape[:2]
-    if w >= paper_w:
-        scale = (paper_w - 1) / w
-        width = int(img.shape[1] * scale)
-        height = int(img.shape[0] * scale)
-        dsize = (width, height)
-        img = cv2.resize(img, dsize)
-    if h >= paper_h:
-        scale = (paper_h - 1) / h
-        width = int(img.shape[1] * scale)
-        height = int(img.shape[0] * scale)
-        dsize = (width, height)
-        img = cv2.resize(img, dsize)
-
     h, w = img.shape[:2]
     offset_h = np.random.randint(0, paper_h - h)
     offset_w = np.random.randint(0, paper_w - w)

@@ -28,9 +28,7 @@ class CharacterRecDataset(Dataset):
             print("Size of val set", len(self.dataset))
 
         self.n_data = cfg["dataset"]["n_data"]
-        self.image_transform = transforms.Compose(
-            [transforms.Resize(120), transforms.ToTensor(),]
-        )
+        self.image_transform = transforms.Compose([transforms.ToTensor(),])
 
     def __len__(self):
         # return self.n_data
@@ -47,55 +45,24 @@ class CharacterRecDataset(Dataset):
         img, text = generate_image_of_n_characters(self.dataset, n_char=n_char)
 
         # Create paper
-        paper_size = (120, 400)
+        paper_size = (128, 400)
         paper = np.ones(paper_size, dtype=np.uint8) * 255
-
-        # # Create horizontal lines on paper
-        # spacing = np.random.randint(50, 100)
-        # line_color = np.random.randint(0, 100)
-        # line_thickness = np.random.randint(1, 2)
-        # line_slant = np.random.randint(-10, 10)
-        # for i in range(0, len(paper), spacing):
-        #     paper = cv2.line(
-        #         paper,
-        #         (0, i + line_slant),
-        #         (paper.shape[1], i - line_slant),
-        #         line_color,
-        #         line_thickness,
-        #     )
-        # kernel_size = np.random.choice([1, 3, 5])
-        # paper = cv2.blur(paper, (kernel_size, kernel_size))
-
-        paper_h, paper_w = paper.shape
-
-        # Scale to fixed height
-        scale = 40 / img.shape[0]
-        width = int(img.shape[1] * scale)
-        height = int(img.shape[0] * scale)
-        dsize = (width, height)
-        img = cv2.resize(img, dsize)
-
         paper, top_left, bot_right = render_data_on_paper(img, paper)
-
-        # if self.is_train:
-        #     # augmentation
-        #     k = np.random.randint(1, 3) * 2 + 1
-        #     n_iter = np.random.randint(1, 5)
-        #     is_thicker_font = np.random.randint(0, 1)
-
-        #     # Set different thickness
-        #     if is_thicker_font:
-        #         paper = cv2.erode(paper, (k, k), n_iter)
-        #     else:
-        #         paper = cv2.dilate(paper, (k, k), n_iter)
-
         text_gt = self._create_label(text)
-        ret, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
-
+        _, paper = cv2.threshold(paper, 220, 255, cv2.THRESH_BINARY)
+        paper = cv2.resize(paper, (200, 64))
         if self.is_visualise:
-            print("n_char:", len(text))
-            print("Encoded:", text_gt)
-            paper = cv2.rectangle(paper, top_left, bot_right, 0, 2)
+            print(
+                "text:",
+                text,
+                "|",
+                "n_char:",
+                len(text),
+                "|",
+                "encoded:",
+                text_gt,
+            )
+            # paper = cv2.rectangle(paper, top_left, bot_right, 0, 1)
             plt.figure(figsize=(10, 10))
             plt.imshow(paper)
             plt.title(text)

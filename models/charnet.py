@@ -72,42 +72,64 @@ class CharSeqNet(nn.Module):
         x = self.c_out(x)
         x = x.permute(0, 2, 1)
         logits = self.sm(x)
-        # logits.shape: B, T, C (64, 21, 24)
+        # B, T, C (64, 21, 24)
         return logits
+
+
+class BidirectionalGRU(nn.Module):
+    def __init__(self, nIn, nHidden, nOut, n_layers):
+        super(BidirectionalGRU, self).__init__()
+
+        self.rnn = nn.GRU(
+            nIn,
+            nHidden,
+            bidirectional=True,
+            batch_first=True,
+            num_layers=n_layers,
+        )
+        self.embedding = nn.Linear(nHidden * 2, nOut)
+
+    def forward(self, inp):
+        recurrent, _ = self.rnn(inp)
+        (B, T, H,) = recurrent.size()
+        t_rec = recurrent.reshape(T * B, H)
+        output = self.embedding(t_rec)
+        output = output.reshape(T, B, -1)
+        return output
 
 
 class CharSeqGruNet(nn.Module):
     def __init__(self, cfg):
         super(CharSeqGruNet, self).__init__()
         self.in_channels = cfg["model"]["in_channels"]
-        self.gru_hidden_size = 128
-        self.gru_num_layers = 2
-        self.gru_in_channels = 1024
-        self.T = cfg["model"]["n_char"] * 2 + 1
+        self.rnn_hidden_size = 128
+        self.rnn_num_layers = 2
+        self.rnn_in_channels = 1024
+        self.T = 25
 
-        self.backbone = m_resnet.create_resnet18()
-        self.t_out = nn.Conv2d(13, self.T, kernel_size=1)
+        self.backbone = m_resnet.create_resnet34()
         self.flat = nn.Flatten(start_dim=2, end_dim=3)
-        self.gru = nn.GRU(
-            self.gru_in_channels,
-            self.gru_hidden_size,
-            self.gru_num_layers,
-            batch_first=True,
-            bidirectional=True,
-        )
-        self.c_out = nn.Linear(
-            self.gru_hidden_size * self.gru_num_layers,
-            cfg["model"]["n_classes"],
+        self.rnn = nn.Sequential(
+            BidirectionalGRU(
+                self.rnn_in_channels,
+                self.rnn_hidden_size,
+                self.rnn_hidden_size,
+                self.rnn_num_layers,
+            ),
+            BidirectionalGRU(
+                self.rnn_hidden_size,
+                self.rnn_hidden_size,
+                cfg["model"]["n_classes"],
+                self.rnn_num_layers,
+            ),
         )
         self.sm = nn.LogSoftmax(dim=2)
 
     def forward(self, x):
         x = self.backbone(x)
         x = x.permute(0, 3, 2, 1)
-        x = self.t_out(x)
         x = self.flat(x)
-        x, _ = self.gru(x)
-        x = self.c_out(x)
+        x = self.rnn(x)
         logits = self.sm(x)
-        # logits.shape: B, T, C (64, 21, 24)
+        # B, T, C (64, 25, 24)
         return logits
