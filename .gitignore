@@ -1,5 +1,5 @@
 data/MNIST/
 __pycache__/
-ckpts/
 
+ckpts/*.pth
 loss.txt
