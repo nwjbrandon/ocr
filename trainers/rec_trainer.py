@@ -48,7 +48,7 @@ class Trainer:
                 self.epochs,
                 np.round(self.loss["train"][-1], 10),
                 np.round(self.loss["val"][-1], 10),
-                np.round(lr[0]),
+                np.round(lr[0], 10),
             )
             print(log)
             with open(self.loss_file, "a") as f:
