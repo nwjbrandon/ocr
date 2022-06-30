@@ -1,6 +1,4 @@
-my_data/
-minst_data/
-
+data/MNIST/
 __pycache__/
 ckpts/
 
