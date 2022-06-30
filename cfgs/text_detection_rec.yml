@@ -1,10 +1,10 @@
 dataset:
-  dataset: datasets.minst_dataset.MinstRecDataset
+  dataset: data.minst_dataset.MinstRecDataset
   is_visualise: False
   n_data: 60000
   img_training_size: 100
   use_collate: False
-  n_char: 4
+  n_char: 10
   n_classes: 11 # 10 digits + 1 EOF token
 train:
   trainer: trainers.rec_trainer.Trainer
@@ -15,22 +15,21 @@ train:
   model_file: ckpts/pytorch_model
   eval_step: 1000
   dataloader_params:
-    num_workers: 4
+    num_workers: 8
     shuffle: True
     batch_size: 64
-  optimizer: torch.optim.RMSprop
+  optimizer: torch.optim.AdamW
   optimizer_params:
-    lr: 0.00001
-    weight_decay: 0.00000001
-    momentum: 0.9
-  scheduler: torch.optim.lr_scheduler.ReduceLROnPlateau
+    lr: 0.0003
+    weight_decay: 0.0001
+  scheduler: torch.optim.lr_scheduler.StepLR
   scheduler_params:
-    mode: max
-    patience: 2
-    verbose: True
+    step_size: 3000
+    gamma: 0.9
+    verbose: False
 model:
   model: models.charnet.CharNet
   in_channels: 1
-  n_char: 4 # Increase to 10 characters
+  n_char: 10 # Increase to 10 characters
   n_classes: 11
   ckpt: null
