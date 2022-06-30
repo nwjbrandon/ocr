@@ -1,0 +1,35 @@
+dataset:
+  dataset: data.minst_dataset.MinstRecDataset
+  is_visualise: False
+  n_data: 60000
+  img_training_size: 100
+  use_collate: False
+  n_char: 10
+  n_classes: 11 # 10 digits + 1 EOF token
+train:
+  trainer: trainers.rec_trainer.Trainer
+  ckpt_freq: 1
+  device: cuda
+  epochs: 300
+  loss_file: loss.txt
+  model_file: ckpts/pytorch_model
+  eval_step: 1000
+  dataloader_params:
+    num_workers: 8
+    shuffle: True
+    batch_size: 64
+  optimizer: torch.optim.AdamW
+  optimizer_params:
+    lr: 0.0003
+    weight_decay: 0.0001
+  scheduler: torch.optim.lr_scheduler.StepLR
+  scheduler_params:
+    step_size: 3000
+    gamma: 0.9
+    verbose: False
+model:
+  model: models.crnn.CRNN
+  in_channels: 1
+  n_char: 10 # Increase to 10 characters
+  n_classes: 11
+  ckpt: null
