@@ -50,11 +50,11 @@ class MinstRecDataset(Dataset):
         return np.array(label)
 
     def __getitem__(self, idx):
-        paper_size = (28, 280)
+        paper_size = (30, 300)
         paper = np.zeros(paper_size, dtype=np.uint8)
 
         # Create sequence of text
-        n_char = 4  # random.randint(1, self.n_char+1)
+        n_char = random.randint(1, self.n_char)
         idx = random.randint(0, len(self.mnist_trainset) - 1)
         img, label = self.mnist_trainset[idx]
         text = str(label)
@@ -83,7 +83,7 @@ class MinstRecDataset(Dataset):
             ax.set_title(text)
             plt.show()
 
-        img = Image.fromarray(img)
-        inp = self.image_transform(img)
+        paper = Image.fromarray(paper)
+        inp = self.image_transform(paper)
 
         return {"inp": inp, "text_gt": text_gt, "text_length": len(text)}

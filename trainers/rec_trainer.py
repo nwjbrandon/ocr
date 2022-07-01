@@ -175,9 +175,9 @@ class Trainer:
 
                 text_pred = np.argmax(text_pred, axis=1)
 
-                print(
-                    "text_gt:", text_gt, "text_pred:", text_pred,
-                )
+                # print(
+                #     "text_gt:", text_gt, "text_pred:", text_pred,
+                # )
 
                 text_pred = self.extract_text_pred(text_pred)
                 text_gt = self.extract_text_gt(text_gt)
@@ -186,13 +186,13 @@ class Trainer:
                 if is_correct:
                     n_corrects += 1
 
-                print(
-                    "text_gt:",
-                    text_gt,
-                    "text_pred:",
-                    text_pred,
-                    "correct:",
-                    is_correct,
-                )
-                input("Enter to view next")
+                # print(
+                #     "text_gt:",
+                #     text_gt,
+                #     "text_pred:",
+                #     text_pred,
+                #     "correct:",
+                #     is_correct,
+                # )
+                # input("Enter to view next")
         print("Accuracy:", n_corrects / len(dataloader) * 100)
